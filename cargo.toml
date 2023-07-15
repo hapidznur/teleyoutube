@@ -1,0 +1,12 @@
+[package]
+name = "youtubesave"
+version = "0.0.1"
+edition = "2021"
+
+[dependencies]
+teloxide = {version =  "0.12", features = ["full"]}
+log = "0.4"
+pretty_env_logger = "0.4"
+tokio = { version = "1.8", features = ["full"]}
+nanoid="0.4"
+
