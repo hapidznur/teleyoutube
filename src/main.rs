@@ -69,8 +69,9 @@ fn message_handler() -> UpdateHandler<Box<dyn std::error::Error + Send + Sync + 
         .branch(callback_query_handler)
 }
 
-async fn start(bot: Bot, msg: Message) -> HandlerResult {
+async fn start(bot: Bot,dialogue: MyDialogue, msg: Message) -> HandlerResult {
     bot.send_message(msg.chat.id, "Let's start! what's your full name").await?;
+    dialogue.update(State::ReceiveFullName).await?;
     Ok(())
 }
 
@@ -79,8 +80,10 @@ async fn help(bot: Bot, msg: Message) -> HandlerResult {
     Ok(())
 }
 
-async fn cancel(bot: Bot, msg: Message) -> HandlerResult {
-    bot.send_message(msg.chat.id, "Let's start! what's your full name").await?;
+async fn cancel(bot: Bot,dialogue: MyDialogue, msg: Message) -> HandlerResult {
+    println!("{} and {}", msg.chat.id, msg.chat.username());
+    bot.send_message(msg.chat.id, format!("cancelled, good by ")).await?;
+    dialogue.exit().await?;
     Ok(())
 }
 
