@@ -1,8 +1,12 @@
+mod saver;
+
 use teloxide::{
     dispatching::{dialogue, dialogue::InMemStorage, UpdateHandler},
     prelude::*, 
     utils::command::BotCommands,
+    // types::{InlineKeyboardButton, InlineKeyboardMarkup},
 };
+use crate::saver::get_video;
 
 type MyDialogue = Dialogue<State, InMemStorage<State>>;
 type HandlerResult = Result<(), Box<dyn std::error::Error + Send + Sync>>;
@@ -15,14 +19,15 @@ pub enum State {
         full_name: String,
     },
 }
+
 #[derive(BotCommands, Clone)]
 #[command(rename_rule = "lowercase", description = "These commands are supported:")]
 enum Command {
-    #[command(description = "display this text")]
+    #[command(description = "display all command and help")]
     Help,
-    #[command(description = "display this text")]
+    #[command(description = "start progress")]
     Start,
-    #[command(description = "display this text")]
+    #[command(description = "cancel download")]
     Cancel,
 }
 
@@ -63,7 +68,6 @@ fn message_handler() -> UpdateHandler<Box<dyn std::error::Error + Send + Sync + 
         case![State::ReceiveUrlYoutube { full_name }].endpoint(receive_product_selection),
     );
 
-
     dialogue::enter::<Update, InMemStorage<State>, State, _>()
         .branch(message_handler)
         .branch(callback_query_handler)
@@ -81,8 +85,7 @@ async fn help(bot: Bot, msg: Message) -> HandlerResult {
 }
 
 async fn cancel(bot: Bot,dialogue: MyDialogue, msg: Message) -> HandlerResult {
-    println!("{} and {}", msg.chat.id, msg.chat.username());
-    bot.send_message(msg.chat.id, format!("cancelled, good by ")).await?;
+    bot.send_message(msg.chat.id, format!("cancelled, good by {}", msg.chat.username().unwrap_or(""))).await?;
     dialogue.exit().await?;
     Ok(())
 }
@@ -93,8 +96,23 @@ async fn invalid_state(bot: Bot, msg: Message) -> HandlerResult {
     Ok(())
 }
 
-async fn receive_fullname(bot: Bot, msg: Message) -> HandlerResult {
-    bot.send_message(msg.chat.id, "fullname").await?;
+async fn receive_fullname(bot: Bot, msg: Message, dialogue: MyDialogue) -> HandlerResult {
+    match msg.text().map(ToOwned::to_owned) {
+        Some(full_name) => {
+            bot.send_message(msg.chat.id, "Your space will be fly and send in minutes").await;
+            get_video(msg, bot).await;
+            // let products = ["Apple", "Banana", "Orange", "Potato"]
+            //     .map(|product| InlineKeyboardButton::callback(product, product));
+
+            // bot.send_message(msg.chat.id, "Select a product:")
+            //     .reply_markup(InlineKeyboardMarkup::new([products]))
+            //     .await?;
+            // dialogue.update(State::ReceiveUrlYoutube { full_name }).await?;
+        }
+        None => {
+            bot.send_message(msg.chat.id, "Please, send me your full name.").await?;
+        }
+    }
     Ok(())
 }
 
