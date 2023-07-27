@@ -11,7 +11,6 @@ use std::io::{self, Write};
 pub async fn get_video(msg: Message, bot: Bot, _url: String) {
     sleep_until(Instant::now() + Duration::from_millis(100)).await;
     bot.send_message(msg.chat.id, "Spacecraft observer to finding next landing land 🛸 ☄️. Please try later").await;
-    // let url = "https://www.youtube.com/watch?v=SV2myatYA5c";
 
     let result = Command::new("ytdl")
         .args(["-S", "ext","--compat-options", "filename", &_url])
