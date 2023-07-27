@@ -4,25 +4,29 @@ use teloxide::{
 };
 
 use std::process::Command;
+use std::io::{self, Write};
 
 
 
-pub async fn get_video(msg: Message, bot: Bot) {
+pub async fn get_video(msg: Message, bot: Bot, _url: String) {
     sleep_until(Instant::now() + Duration::from_millis(100)).await;
-    let output = Command::new("pwd")
-        .spawn()
-        .expect("pwd command failed to start");
-
-    let output = Command::new("ls")
-        .arg("-a")
-        .arg("-l")
-        .spawn()
-        .expect("cwd command failed to start");
     bot.send_message(msg.chat.id, "Spacecraft observer to finding next landing land 🛸 ☄️. Please try later").await;
+    // let url = "https://www.youtube.com/watch?v=SV2myatYA5c";
 
-    Command::new("ytdl --format-sort https://www.youtube.com/watch?v=SV2myatYA5c")
-        .spawn()
-        .expect("ytdl command failed to start");
+    let result = Command::new("ytdl")
+        .args(["-S", "ext","--compat-options", "filename", &_url])
+        .output()
+        .expect("failed to execute process");
 
-    bot.send_message(msg.chat.id, "Spacecraft crash into asteroid 🛸 ☄️. Please try later").await;
+    println!("status: {}", result.status);
+
+    let filename = Command::new("ytdl")
+        .args(["--print", "filename", "--compat-options", "filename",&_url])
+        .output()
+        .expect("failed to execute process");
+ 
+    let mut binary_path = String::new();
+    binary_path = String::from_utf8(filename.stdout).unwrap();
+
+    bot.send_message(msg.chat.id, format!("Spacecraft landing on asteroid  🛸 ☄️ {} Congratulation.", binary_path)).await;
 }

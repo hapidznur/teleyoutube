@@ -74,7 +74,8 @@ fn message_handler() -> UpdateHandler<Box<dyn std::error::Error + Send + Sync + 
 }
 
 async fn start(bot: Bot,dialogue: MyDialogue, msg: Message) -> HandlerResult {
-    bot.send_message(msg.chat.id, "Let's start! what's your full name").await?;
+    bot.send_message(msg.chat.id, "Let's start! type your url of youtube video").await?;
+    // get_video(msg, bot).await;
     dialogue.update(State::ReceiveFullName).await?;
     Ok(())
 }
@@ -100,7 +101,7 @@ async fn receive_fullname(bot: Bot, msg: Message, dialogue: MyDialogue) -> Handl
     match msg.text().map(ToOwned::to_owned) {
         Some(full_name) => {
             bot.send_message(msg.chat.id, "Your space will be fly and send in minutes").await;
-            get_video(msg, bot).await;
+            get_video(msg, bot, full_name).await;
             // let products = ["Apple", "Banana", "Orange", "Potato"]
             //     .map(|product| InlineKeyboardButton::callback(product, product));
 
